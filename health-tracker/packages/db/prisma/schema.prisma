@@ -1,0 +1,203 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User authentication and profile
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  dob          DateTime?
+  gender       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations - all the health data connected to this user
+  dailyMetrics    DailyMetric[]
+  workouts        Workout[]
+  meals           Meal[]
+  sleepSessions   SleepSession[]
+  fastingWindows  FastingWindow[]
+  moodCycles      MoodCycle[]
+  goals           Goal[]
+  deviceAccounts  DeviceAccount[]
+  reportCache     ReportCache[]
+
+  @@map("users")
+}
+
+// Daily health metrics (weight, body composition, etc.)
+model DailyMetric {
+  id                  String   @id @default(cuid())
+  userId              String
+  date                DateTime @db.Date
+  weight              Float?
+  bodyFatPct          Float?
+  skeletalMuscleMass  Float?
+  restingHR           Int?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Ensure one entry per user per date
+  @@unique([userId, date])
+  @@map("daily_metrics")
+}
+
+// Workout sessions
+model Workout {
+  id        String   @id @default(cuid())
+  userId    String
+  startTime DateTime
+  endTime   DateTime
+  type      String   // strength, cardio, hiit, yoga, sports, other
+  intensity Int      // 1-10 scale
+  calories  Int?
+  avgHR     Int?     // average heart rate
+  maxHR     Int?     // maximum heart rate
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("workouts")
+}
+
+// Meal tracking and nutrition
+model Meal {
+  id          String   @id @default(cuid())
+  userId      String
+  mealTime    DateTime
+  foodName    String
+  calories    Int
+  protein     Float?   // grams
+  carbs       Float?   // grams
+  fat         Float?   // grams
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("meals")
+}
+
+// Sleep tracking
+model SleepSession {
+  id            String   @id @default(cuid())
+  userId        String
+  startTime     DateTime
+  endTime       DateTime
+  duration      Int      // minutes
+  efficiency    Float?   // percentage (0-100)
+  sleepStages   Json?    // detailed sleep stages data
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sleep_sessions")
+}
+
+// Intermittent fasting tracking
+model FastingWindow {
+  id        String    @id @default(cuid())
+  userId    String
+  startTime DateTime
+  endTime   DateTime?
+  duration  Int?      // minutes (calculated when ended)
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("fasting_windows")
+}
+
+// Mood and menstrual cycle tracking
+model MoodCycle {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  mood      Int?     // 1-10 scale
+  cycleDay  Int?     // day of cycle (optional)
+  symptoms  Json?    // array of symptoms
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, date])
+  @@map("mood_cycles")
+}
+
+// User goals and targets
+model Goal {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String    // weight_loss, workout_frequency, nutrition, etc.
+  target      Float
+  current     Float?
+  unit        String    // kg, workouts_per_week, calories, etc.
+  deadline    DateTime?
+  achieved    Boolean   @default(false)
+  achievedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("goals")
+}
+
+// Device integrations (Oura, Garmin, etc.)
+model DeviceAccount {
+  id           String   @id @default(cuid())
+  userId       String
+  provider     String   // oura, garmin, fitbit, etc.
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  lastSync     DateTime?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, provider])
+  @@map("device_accounts")
+}
+
+// Cached report data for performance
+model ReportCache {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // weekly, monthly, custom
+  period    String   // 2024-W23, 2024-03, custom-date-range
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, type, period])
+  @@map("report_cache")
+}
