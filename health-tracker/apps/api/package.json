@@ -12,8 +12,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@health-tracker/db": "*",
-    "@health-tracker/types": "*",
+    "@health-tracker/db": "workspace:*",
+    "@health-tracker/types": "workspace:*",
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "helmet": "^7.1.0",
@@ -21,13 +21,16 @@
     "jsonwebtoken": "^9.0.2",
     "express-rate-limit": "^7.1.5",
     "dotenv": "^16.3.1",
-    "zod": "^3.22.4"
+    "cookie-parser": "^1.4.6",
+    "compression": "^1.7.4"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/cors": "^2.8.17",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.5",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/compression": "^1.7.5",
     "@types/node": "^20.11.30",
     "tsx": "^4.6.0",
     "typescript": "^5.6.3",
@@ -35,6 +38,7 @@
     "jest": "^29.7.0",
     "@types/jest": "^29.5.8",
     "supertest": "^6.3.3",
-    "@types/supertest": "^2.0.16"
+    "@types/supertest": "^2.0.16",
+    "ts-jest": "^29.1.1"
   }
 }

@@ -1,4 +1,4 @@
-import { prisma } from './src/index';
+import { prisma } from './index';
 import bcrypt from 'bcryptjs';
 
 async function main() {

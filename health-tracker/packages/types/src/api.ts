@@ -16,19 +16,22 @@ export const PaginationSchema = z.object({
     totalPages: z.number().min(0),
 })
 
-// Date range filter
-export const DateRangeSchema = z.object({
+// Define the base object first (without refine)
+export const DateRangeObject = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-}).refine((data) => {
+});
+
+// Now, create the refined schema from the base object
+export const DateRangeSchema = DateRangeObject.refine((data) => {
   if (data.startDate && data.endDate) {
-    return new Date(data.startDate) <= new Date(data.endDate)
+    return new Date(data.startDate) <= new Date(data.endDate);
   }
-  return true
+  return true;
 }, {
   message: "End date must be after start date",
   path: ["endDate"],
-})
+});
 
 // Query parameters for list endpoints
 export const ListQuerySchema = z.object({
@@ -36,7 +39,7 @@ export const ListQuerySchema = z.object({
   limit: z.string().transform(Number).pipe(z.number().min(1).max(100)).optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
-}).merge(DateRangeSchema)
+}).merge(DateRangeObject)
 
 // Error response schema
 export const ErrorResponseSchema = z.object({
@@ -47,7 +50,7 @@ export const ErrorResponseSchema = z.object({
 })
 
 // Authentication token response
-export const authTokenSchema = z.object({
+export const AuthTokenSchema = z.object({
     accessToken: z.string(),
     refreshToken: z.string(),
     expiresIn: z.number(),
