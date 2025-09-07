@@ -11,7 +11,7 @@ import { prisma } from '@health-tracker/db'
 
 // Import our routes (we'll create these)
 import authRoutes from './routes/auth'
-import metricsRoutes from './routes/metrics'
+// import metricsRoutes from './routes/metrics'
 import { errorHandler } from './middleware/errorHandler'
 import { requestLogger } from './middleware/logger'
 
@@ -96,7 +96,7 @@ app.get('/health', async (req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes)
-app.use('/api/metrics', metricsRoutes)
+// app.use('/api/metrics', metricsRoutes)
 
 // 404 handler
 app.use('*', (req, res) => {
