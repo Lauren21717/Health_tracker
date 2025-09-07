@@ -19,8 +19,8 @@
       }
     ],
     "paths": {
-      "@health-tracker/db": ["./packages/db/src"],
-      "@health-tracker/types": ["./packages/types/src"],
+      "@health-tracker/db": ["./packages/db/src/index.ts"],
+      "@health-tracker/types": ["./packages/types/src/index.ts"],
       "@health-tracker/ui": ["./packages/ui/src"]
     }
   },
